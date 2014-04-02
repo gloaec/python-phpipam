@@ -1,0 +1,21 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+##########################################################################
+# ./import - Import IP/MAC bindings from distant phpipam server
+# Copyright © 2014 Ghislain Loaec <gloaec@cadoles.com>
+#
+# License GPLv3: http://sourceforge.net/directory/license:gplv3/
+##########################################################################
+
+APP_ID="APP001"
+APP_KEY="2f390b96661c5717a6bebad830878e7e"
+APP_URL="http://localhost/phpipam/api/"
+
+from phpipam import Api
+
+api = Api(app_id=APP_ID, app_key=APP_KEY, api_url=APP_URL)
+
+for section in api.getSections():
+    print "- [%s] %s" % (section['id'], section['description'])
+    for subnet in api.getSubnetsInSection(section['id']):
+        print "  - [%s] %s: %s" % (subnet['id'], subnet['description'], subnet['subnet'])
