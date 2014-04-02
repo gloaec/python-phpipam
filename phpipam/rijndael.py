@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 A pure python (slow) implementation of rijndael with a decent interface
 

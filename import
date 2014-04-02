@@ -7,18 +7,44 @@
 # License GPLv3: http://sourceforge.net/directory/license:gplv3/
 ##########################################################################
 
+import sys, getopt
 from phpipam import Api
 
-if __name__ == "__main__":
+def main(argv):
     config = {}
     execfile("phpipam.conf", config)
 
     api = Api(app_id=config['APP_ID'], 
               app_key=config['APP_KEY'], 
               api_url=config['API_URL'])
-    
-    print "==[export.csv]================================================="
-    print api.exportAddresses(format='csv')
-    
-    print "==[/etc/dhcp3/dhcpd.conf]======================================"
-    print api.exportAddresses(format='dhcpd.conf')
+
+    outputfile = None
+    format     = 'dhcpd.conf'
+
+    try:
+       opts, args = getopt.getopt(argv,"hf:i:o:",["format=","ifile=","ofile="])
+    except getopt.GetoptError:
+       print "import -f <format> [-o <outputfile>]"
+       sys.exit(2)
+    for opt, arg in opts:
+       if opt == '-h':
+          print "import -f <format> [-o <outputfile>]\n\n"
+          print "  -f <format>     Possible values: ['csv','dhcpd.conf']\n"
+          print "  -o <outpufile>  Import ouput file\n\n"
+          sys.exit()
+       elif opt in ("-o", "--ofile"):
+          outputfile = arg
+       elif opt in ("-f", "--format"):
+          format = arg
+
+    result = api.exportAddresses(format=format)
+
+    if outputfile is None:
+        print result
+    else:
+        f = open(outputfile, 'w')
+        f.write(result)
+        f.close()
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
