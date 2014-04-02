@@ -7,15 +7,18 @@
 # License GPLv3: http://sourceforge.net/directory/license:gplv3/
 ##########################################################################
 
-APP_ID="APP001"
-APP_KEY="2f390b96661c5717a6bebad830878e7e"
-APP_URL="http://localhost/phpipam/api/"
-
 from phpipam import Api
 
-api = Api(app_id=APP_ID, app_key=APP_KEY, api_url=APP_URL)
+if __name__ == "__main__":
+    config = {}
+    execfile("phpipam.conf", config)
 
-for section in api.getSections():
-    print "- [%s] %s" % (section['id'], section['description'])
-    for subnet in api.getSubnetsInSection(section['id']):
-        print "  - [%s] %s: %s" % (subnet['id'], subnet['description'], subnet['subnet'])
+    api = Api(app_id=config['APP_ID'], 
+              app_key=config['APP_KEY'], 
+              api_url=config['API_URL'])
+    
+    print "==[export.csv]================================================="
+    print api.exportAddresses(format='csv')
+    
+    print "==[/etc/dhcp3/dhcpd.conf]======================================"
+    print api.exportAddresses(format='dhcpd.conf')

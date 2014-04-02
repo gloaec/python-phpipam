@@ -11,14 +11,14 @@ DEBUG = False
 
 class Api(object):
 
-    _app_id = ''
+    _app_id  = ''
     _app_key = ''
     _api_url = ''
  
     def __init__(self, app_id='', app_key='', api_url=''):
         """ Construct an Api object, 
             taking an APP ID, APP KEY and API URL parameter """
-        self._app_id = app_id
+        self._app_id  = app_id
         self._app_key = app_key
         self._api_url = api_url
  
@@ -35,12 +35,17 @@ class Api(object):
         req = urllib2.Request(self._api_url, data)
         if DEBUG: print "Querying '%s'..." % self._api_url
         response = urllib2.urlopen(req)
-        result = json.loads(response.read())
-        if DEBUG: print "Result: %s" % result
-        return result
+        try:
+            result = json.loads(response.read())
+            if DEBUG: print "Result: %s" % result
+            return result
+        except ValueError, e:
+            print "Error", e
+            print "Response: %s" % response.read()
+        pass
 
     def getSections(self):
-        """ Retrieve Phpipam sections """
+        """ Get all sections """
         res = self.sendRequest({
             'controller': 'sections', 
             'action'    : 'read', 
@@ -48,8 +53,22 @@ class Api(object):
         })
         return res['data']
 
+    def getAddresses(self, format='ip'):
+        """ Get all adresses
+              format='decimal' returns in decimal form (default)
+              format='ip'      returns in IP address """
+        res = self.sendRequest({
+            'controller': 'addresses', 
+            'action'    : 'read', 
+            'format'    : format,
+            'all'       : True
+        })
+        return res['data']
+
     def getSubnetsInSection(self, section_id, format='ip'):
-        """ Get all subnets in a specific section """
+        """ Get all subnets in a specific section 
+              format='decimal' returns in decimal form (default)
+              format='ip'      returns in IP address """
         res = self.sendRequest({
             'controller': 'subnets', 
             'action'    : 'read', 
@@ -57,7 +76,28 @@ class Api(object):
             'sectionId' : section_id
         })
         return res['data']
-    
+
+    def exportAddresses(self, format='csv'):
+       """ Export Ip addresses to desired format:
+             * csv
+             * dhcpd.conf
+       """
+       if format == 'csv':
+           # IP # State # Description # hostname # MAC # Owner # Device # Port # Note"
+           s = ""
+           for address in self.getAddresses(format='decimal'):
+               s+='#'.join([address['ip_addr'], address['state'], address['description'], \
+                   address['dns_name'], address['mac'], address['owner'], \
+                   address['switch'], address['note']])+"\n"
+       elif format == 'dhcpd.conf':
+           s = "# Generated from %s - %s\n\n" % (self._app_id, self._api_url)
+           for address in self.getAddresses(format='ip'):
+               s+= "host %s {\n" % address['description']
+               s+= "  hardware ethernet %s;\n" % address['mac']
+               s+= "  fixed-address %s;\n" % address['ip_addr']
+               s+= "}\n\n"
+       return s
+
 
 def encrypt(key, plaintext):
     padded_key = key.ljust(KEY_SIZE, '\0')
