@@ -16,4 +16,5 @@ Usage
     Usage: import_addresses -f <format> [-o <outputfile>]
 
         -f <format>     Possible values: ['csv','dhcpd.conf']
+        -s <separator>  Separator character for csv export (default: '#')
         -o <outpufile>  Import ouput file
