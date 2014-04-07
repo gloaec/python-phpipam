@@ -33,20 +33,36 @@ class Addresses
 	public function createAddresses($_params)
 	{
 		//init section class
+                // id
+                // subnetId
+                // ip_addr
+                // description
+                // dns_name
+                // mac
+                // owner
+                // state
+                // switch
+                // port
+                // note
+                // lastSeen
+                // excludePing
+                // editDate
 		$address = new Address();
 		//required parameters
 		$address->action      		= $this->_params['action'];
-		$address->sectionId        	= $this->_params['sectionId'];
-		$address->masterAddressId 	= $this->_params['masterAddressId'];
-		$address->address		= $this->_params['address'];
-		$address->mask	  		= $this->_params['mask'];
+		$address->subnetId        	= $this->_params['subnetId'];
+		$address->ip_addr 		= $this->_params['ip_addr'];
 		$address->description	  	= $this->_params['description'];
-		$address->vrfId			= $this->_params['vrfId'];
-		$address->vlanId		= $this->_params['vlanId'];
-		$address->allowRequests		= $this->_params['allowRequests'];
-		$address->showName		= $this->_params['showName'];
-		$address->permissions		= $this->_params['permissions'];
-		$address->pingAddress		= $this->_params['pingAddress'];
+		$address->dns_name		= $this->_params['dns_name'];
+		$address->mac	  		= $this->_params['mac'];
+		$address->owner			= $this->_params['owner'];
+		$address->state			= $this->_params['state'];
+		$address->switch		= $this->_params['switch'];
+		$address->port			= $this->_params['port'];
+		$address->note			= $this->_params['note'];
+		$address->lastSeen		= $this->_params['lastSeen'];
+		$address->excludePing		= $this->_params['excludePing'];
+		$address->editDate		= $this->_params['editDate'];
 
 		//create section
 		$res = $address->createAddress(); 	
@@ -69,7 +85,7 @@ class Addresses
 		//get all addresses
 		if($this->_params['all']){ $address->all = true; }
 		//get all addresses in address
-		elseif($this->_params['sectionId']) { $address->sectionId = $this->_params['sectionId']; }
+		elseif($this->_params['subnetId']) { $address->subnetId = $this->_params['subnetId']; }
 		//get address by ID
 		else { $address->id = $this->_params['id']; }
 		
