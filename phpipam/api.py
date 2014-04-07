@@ -4,6 +4,9 @@ import rijndael
 import base64
 import urllib
 import urllib2
+import socket
+import struct 
+from IPy import IP
 
 KEY_SIZE = 16
 BLOCK_SIZE = 32
@@ -44,20 +47,22 @@ class Api(object):
             print "Response: %s" % response.read()
         return {'success': False, 'error': response.read()}
 
-    def getSections(self):
+    def getSections(self, format='ip'):
         """ Get all sections """
         res = self.sendRequest({
             'controller': 'sections', 
             'action'    : 'read', 
+            'format'    : format,
             'all'       : True
         })
         return res['data']
 
-    def getSubnets(self):
+    def getSubnets(self, format='ip'):
         """ Get all subnets """
         res = self.sendRequest({
             'controller': 'subnets', 
             'action'    : 'read', 
+            'format'    : format,
             'all'       : True
         })
         return res['data']
@@ -98,13 +103,31 @@ class Api(object):
         })
         return res['data']
 
-    def createAddress(self, description=None, ip_addr=None, mac=None, subnet_id=None,
+    def createAddress(self, description=None, ip_addr=None, mac=None, subnet_id=None, mask=24,
                 dns_name=None, owner=None, state=None, switch=None, port=None, note=None):
         """ Create a new IP address and calculates the subnet associated """
+        i = ip_addr.split('/')
+        ip_addr = i[0]
+        if len(i) > 1: mask = i[1]
+        if subnet_id is None:
+            print "Looking for subnet..."
+            for s in self.getSubnets(format='ip'):
+                if not s['subnet'] or not s['mask']: continue
+                ips = IP('%s/%s' % (s['subnet'], s['mask']))
+                p = "- (IPv%s) %s/%s" % (ips.version(), s['subnet'], s['mask'])
+                if ips.version() == 6: pass
+                elif ip_addr in ips and s['mask'] == mask:
+                    subnet_id = s['id']
+                    p += " <- %s" % ip_addr
+                print p
+        if subnet_id is None:
+            raise Exception("Subnet doesn't exist for ip %s" % ip_addr)
+        ip_addr = struct.unpack("!I", socket.inet_aton(ip_addr))[0]
         res = self.sendRequest({
             'controller' : 'addresses',
             'action'     : 'create',
-            'subnetId'   : 1, #subnet_id,
+            'format'     : 'ip',
+            'subnetId'   : subnet_id,
             'ip_addr'    : ip_addr,
             'description': description,
             'dns_name'   : dns_name,
@@ -116,6 +139,15 @@ class Api(object):
             'note'       : note
         })
         return res['data']
+
+    def importIpMacBindings(self):
+       """ Import Ip Addresses and Mac address associated """
+       s = ""
+       for address in self.getAddresses(format='ip'):
+           if not address['description']: address['description'] = 'Unknown'
+           if address['ip_addr'] and address['mac']:
+               s+= '#'.join([address['description'], address['ip_addr'], address['mac']])+"\n"
+       return s
 
     def importAddresses(self, format='csv', separator='#'):
        """ Export Ip addresses to desired format:

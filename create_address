@@ -21,27 +21,31 @@ def main(argv):
     description = None
     ip_address  = None
     mac_address = None
+    mask        = 24
 
     try:
-       opts, args = getopt.getopt(argv,"hd:i:m:",["description=","ip_address=","mac_address="])
+       opts, args = getopt.getopt(argv,"hd:i:p:m:",["description=","ip_address=","mac_address=","mask="])
     except getopt.GetoptError:
-       print "Usage: create_address -d <description> -i <ip_address> -m <mac_address>"
+       print "Usage: create_address -d <description> -i <ip_address> -p <mac_address> -m <mask>"
        sys.exit(2)
     for opt, arg in opts:
        if opt == '-h':
-          print "Usage: create_address -d <description> -i <ip_address> -m <mac_address>\n\n"
+          print "Usage: create_address -d <description> -i <ip_address> -p <mac_address> -m <mask>\n\n"
           print "  -d <description>  Host description\n\n"
           print "  -i <ip_address>   IP Address for the host\n\n"
-          print "  -m <mac_address>  MAC Address for the host\n\n"
+          print "  -p <mac_address>  MAC Address for the host\n\n"
+          print "  -m <mask>         IP Mask\n\n"
           sys.exit()
        elif opt in ("-d", "--description"):
           description = arg
        elif opt in ("-i", "--ip-address"):
           ip_address = arg
-       elif opt in ("-m", "--mac-address"):
+       elif opt in ("-p", "--mac-address"):
           mac_address = arg
+       elif opt in ("-m", "--mask"):
+          mask = arg
 
-    result = api.createAddress(description=description, ip_addr=ip_address, mac=mac_address)
+    result = api.createAddress(description=description, ip_addr=ip_address, mac=mac_address, mask=mask)
     
     print result
 
