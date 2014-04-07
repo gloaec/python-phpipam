@@ -137,7 +137,7 @@ class Address
             $arr = array();
             foreach($obj as $key => $val) {
                 // proper format
-                if($key=="address" && $format=="ip") {
+                if($key=="ip_addr" && $format=="ip") {
                     $val = transform2long($val);
                 }
                 // output format

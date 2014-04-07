@@ -77,7 +77,7 @@ class Api(object):
         })
         return res['data']
 
-    def exportAddresses(self, format='csv'):
+    def exportAddresses(self, format='csv', separator='#'):
        """ Export Ip addresses to desired format:
              * csv
              * dhcpd.conf
@@ -86,7 +86,7 @@ class Api(object):
            # IP # State # Description # hostname # MAC # Owner # Device # Port # Note"
            s = ""
            for address in self.getAddresses(format='decimal'):
-               s+='#'.join([address['ip_addr'], address['state'], address['description'], \
+               s+= separator.join([address['ip_addr'], address['state'], address['description'], \
                    address['dns_name'], address['mac'], address['owner'], \
                    address['switch'], address['note']])+"\n"
        elif format == 'dhcpd.conf':
