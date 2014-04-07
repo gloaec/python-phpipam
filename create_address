@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+##########################################################################
+# ./create_address - Create a new IP address in phpipam
+# Copyright © 2014 Ghislain Loaec <gloaec@cadoles.com>
+#
+# License GPLv3: http://sourceforge.net/directory/license:gplv3/
+##########################################################################
+
+import sys, getopt
+from phpipam import Api
+
+def main(argv):
+    config = {}
+    execfile("phpipam.conf", config)
+
+    api = Api(app_id=config['APP_ID'], 
+              app_key=config['APP_KEY'], 
+              api_url=config['API_URL'])
+
+    description = None
+    ip_address  = None
+    mac_address = None
+
+    try:
+       opts, args = getopt.getopt(argv,"hd:i:m:",["description=","ip_address=","mac_address="])
+    except getopt.GetoptError:
+       print "Usage: create_address -d <description> -i <ip_address> -m <mac_address>"
+       sys.exit(2)
+    for opt, arg in opts:
+       if opt == '-h':
+          print "Usage: create_address -d <description> -i <ip_address> -m <mac_address>\n\n"
+          print "  -d <description>  Host description\n\n"
+          print "  -i <ip_address>   IP Address for the host\n\n"
+          print "  -m <mac_address>  MAC Address for the host\n\n"
+          sys.exit()
+       elif opt in ("-d", "--description"):
+          description = arg
+       elif opt in ("-i", "--ip-address"):
+          ip_address = arg
+       elif opt in ("-m", "--mac-address"):
+          mac_address = arg
+
+    result = api.createAddress(description=description, ip_addr=ip_address, mac=mac_address)
+    
+    print result
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

@@ -42,12 +42,21 @@ class Api(object):
         except ValueError, e:
             print "Error", e
             print "Response: %s" % response.read()
-        pass
+        return {'success': False, 'error': response.read()}
 
     def getSections(self):
         """ Get all sections """
         res = self.sendRequest({
             'controller': 'sections', 
+            'action'    : 'read', 
+            'all'       : True
+        })
+        return res['data']
+
+    def getSubnets(self):
+        """ Get all subnets """
+        res = self.sendRequest({
+            'controller': 'subnets', 
             'action'    : 'read', 
             'all'       : True
         })
@@ -77,7 +86,38 @@ class Api(object):
         })
         return res['data']
 
-    def exportAddresses(self, format='csv', separator='#'):
+    def getAdressesInSubnet(self, subnet_id, format='ip'):
+        """ Get all IP addreses in a specific subnet 
+              format='decimal' returns in decimal form (default)
+              format='ip'      returns in IP address """
+        res = self.sendRequest({
+            'controller': 'addresses', 
+            'action'    : 'read', 
+            'format'    : format,
+            'subnetId' : subnet_id
+        })
+        return res['data']
+
+    def createAddress(self, description=None, ip_addr=None, mac=None, subnet_id=None,
+                dns_name=None, owner=None, state=None, switch=None, port=None, note=None):
+        """ Create a new IP address and calculates the subnet associated """
+        res = self.sendRequest({
+            'controller' : 'addresses',
+            'action'     : 'create',
+            'subnetId'   : 1, #subnet_id,
+            'ip_addr'    : ip_addr,
+            'description': description,
+            'dns_name'   : dns_name,
+            'mac'        : mac,
+            'owner'      : owner,
+            'state'      : state,
+            'switch'     : switch,
+            'port'       : port,
+            'note'       : note
+        })
+        return res['data']
+
+    def importAddresses(self, format='csv', separator='#'):
        """ Export Ip addresses to desired format:
              * csv
              * dhcpd.conf
@@ -85,10 +125,11 @@ class Api(object):
        if format == 'csv':
            # IP # State # Description # hostname # MAC # Owner # Device # Port # Note"
            s = ""
-           for address in self.getAddresses(format='decimal'):
-               s+= separator.join([address['ip_addr'], address['state'], address['description'], \
-                   address['dns_name'], address['mac'], address['owner'], \
-                   address['switch'], address['note']])+"\n"
+           for address in self.getAddresses(format='ip'):
+               #s+= separator.join([address['ip_addr'], address['state'], address['description'], \
+               #    address['dns_name'], address['mac'], address['owner'], \
+               #    address['switch'], address['note']])+"\n"
+               s+= separator.join([address['description'], address['ip_addr'], address['mac']])+"\n"
        elif format == 'dhcpd.conf':
            s = "# Generated from %s - %s\n\n" % (self._app_id, self._api_url)
            for address in self.getAddresses(format='ip'):
