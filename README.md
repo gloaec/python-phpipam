@@ -42,7 +42,7 @@ Use to create or modify addresses
 
 ### `./getipmacs` 
 
-Use to get the csv export of IP/MAC addresses bindings
+Use to get the csv export of IP/MAC addresses bindings.
 
     usage: getipmacs [-h] [-f {eole,csv,dhcpd.conf}] [-o OUTPUTFILE]
                      [-s SEPARATOR] [-D] [-v]
@@ -58,6 +58,10 @@ Use to get the csv export of IP/MAC addresses bindings
       -D, --debug           Debug mode
       -v, --version         Display version
 
+If you choose __eole__ format, options will be set as such :
+
+* outputfile = `/var/lib/eole/config/dhcp.conf`
+* separator = `#`
 
 ### `./getips` 
 
