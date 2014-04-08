@@ -63,7 +63,3 @@ If you choose __eole__ format, options will be set as such :
 * outputfile = `/var/lib/eole/config/dhcp.conf`
 * separator = `#`
 
-### `./getips` 
-
-Use to get addresses data to desired format
-
