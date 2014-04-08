@@ -15,8 +15,9 @@ The API is inconsistent on master repository enovance/phpipam
 Installation instructions
 -------------------------
 
-1. Install **phpipam** and enable the API from the interface
-2. Setup API credentials in `phpipam.conf`
+1. Dependencies: `apt-get install python-argparse`
+2. Install **phpipam** and enable the API from the interface
+3. Setup API credentials in `phpipam.conf`
 
 Usage
 -----
