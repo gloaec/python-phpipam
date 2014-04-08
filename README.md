@@ -26,7 +26,7 @@ Usage
 
 Use to create or modify addresses
 
-    usage: create_address [-h] [-v] [-d DESCRIPTION] [-D] [-m MAC] [-n MASK] ip
+    usage: createip [-h] [-v] [-d DESCRIPTION] [-D] [-m MAC] [-n MASK] ip
     
     positional arguments:
       ip                    IP address (CIDR format supported)
@@ -43,6 +43,21 @@ Use to create or modify addresses
 ### `./getipmacs` 
 
 Use to get the csv export of IP/MAC addresses bindings
+
+    usage: getipmacs [-h] [-f {eole,csv,dhcpd.conf}] [-o OUTPUTFILE]
+                     [-s SEPARATOR] [-D] [-v]
+    
+    optional arguments:
+      -h, --help            show this help message and exit
+      -f {eole,csv,dhcpd.conf}, --format {eole,csv,dhcpd.conf}
+                            Output format
+      -o OUTPUTFILE, --outputfile OUTPUTFILE
+                            Destination file
+      -s SEPARATOR, --separator SEPARATOR
+                            CSV export separator
+      -D, --debug           Debug mode
+      -v, --version         Display version
+
 
 ### `./getips` 
 
