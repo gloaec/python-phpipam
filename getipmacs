@@ -51,7 +51,7 @@ def main(argv):
                 separator = args.separator)
 
         if args.outputfile is None:
-            print res
+            print res, "\n"
         else:
             f = open(args.outputfile, 'w')
             f.write(res)
