@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+##########################################################################
+# ./createip - Create a new IP address in phpipam
+# Copyright © 2014 Ghislain Loaec <gloaec@cadoles.com>
+#
+# License GPLv3: http://sourceforge.net/directory/license:gplv3/
+##########################################################################
+
+import sys
+import argparse
+from phpipam import Api
+
+config = {}
+
+def main(argv):
+    version = ' '.join([sys.argv[0], config['VERSION']])
+    parser  = argparse.ArgumentParser()
+
+    parser.add_argument("ip",
+                help    = "IP address (CIDR format supported)")
+    parser.add_argument("-d", "--description", 
+                help    = "Ip address description")
+    parser.add_argument("-m", "--mac", 
+                help    = "Mac address")
+    parser.add_argument("-n", "--mask", 
+                help    = "Netmask",
+                default = 24)
+    parser.add_argument("-D", "--debug", 
+                action  = "store_true",
+                help    = "Debug mode")
+    parser.add_argument("-v", "--version", 
+                action  = 'version', 
+                version = version,
+                help    = "Display version")
+
+    args = parser.parse_args()
+
+    api = Api(app_id  = config['APP_ID'], 
+              app_key = config['APP_KEY'], 
+              api_url = config['API_URL'],
+              debug   = args.debug)
+
+    try:
+        res = api.createAddress(
+                description = args.description, 
+                ip_addr     = args.ip, 
+                mac         = args.mac, 
+                mask        = args.mask)
+        print res
+    except Exception, e:
+        print "Error:", e
+
+if __name__ == "__main__":
+    execfile("phpipam.conf", config)
+    main(sys.argv[1:])

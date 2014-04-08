@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+##########################################################################
+# ./getipmacs - Import IP/MAC bindings from distant phpipam server
+# Copyright © 2014 Ghislain Loaec <gloaec@cadoles.com>
+#
+# License GPLv3: http://sourceforge.net/directory/license:gplv3/
+##########################################################################
+
+import sys
+import argparse
+from phpipam import Api
+
+config = {}
+
+def main(argv):
+    version = ' '.join([sys.argv[0], config['VERSION']])
+    parser  = argparse.ArgumentParser()
+
+    parser.add_argument("-f", "--format",
+                choices = ['eole', 'csv', 'dhcpd.conf'],
+                default = 'csv',
+                help    = "Output format")
+    parser.add_argument("-o", "--outputfile", 
+                help    = "Destination file")
+    parser.add_argument("-s", "--separator", 
+                default = ',',
+                help    = "CSV export separator")
+    parser.add_argument("-D", "--debug", 
+                action  = "store_true",
+                help    = "Debug mode")
+    parser.add_argument("-v", "--version", 
+                action  = 'version', 
+                version = version,
+                help    = "Display version")
+
+    args = parser.parse_args()
+
+    if args.format == 'eole':
+        args.outputfile = '/var/lib/eole/config/dhcp.conf'
+        args.separator = '#'
+
+    api = Api(app_id  = config['APP_ID'], 
+              app_key = config['APP_KEY'], 
+              api_url = config['API_URL'],
+              debug   = args.debug)
+
+    try:
+        res = api.importIpMacBindings(
+                separator = args.separator)
+
+        if args.outputfile is None:
+            print res
+        else:
+            f = open(args.outputfile, 'w')
+            f.write(res)
+            f.close()
+    except Exception, e:
+        print "Error:", e
+
+if __name__ == "__main__":
+    execfile("phpipam.conf", config)
+    main(sys.argv[1:])
