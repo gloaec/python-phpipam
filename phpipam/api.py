@@ -39,13 +39,14 @@ class Api(object):
         if self._debug: print "Querying '%s'..." % self._api_url
         response = urllib2.urlopen(req)
         try:
-            result = json.loads(response.read())
+            raw_response = response.read()
+            result = json.loads(raw_response)
             if self._debug: print "Result: %s" % result
             return result
         except ValueError, e:
             print "Error", e
-            print "Response: %s" % response.read()
-        return {'success': False, 'error': response.read()}
+            print "Response: %s" % raw_response
+        return {'success': False, 'error': raw_response}
 
     def getSections(self, format='ip'):
         """ Get all sections """
