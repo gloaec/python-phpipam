@@ -110,20 +110,22 @@ class Api(object):
         i = ip_addr.split('/')
         ip_addr = i[0]
         if len(i) > 1: mask = i[1]
-        p = ""
+        subnet = ""
         if subnet_id is None:
             print "Looking for subnet..."
             for s in self.getSubnets(format='ip'):
                 if not s['subnet'] or not s['mask']: continue
                 ips = IP('%s/%s' % (s['subnet'], s['mask']))
-                p = "%s/%s (IPv%s) " % (s['subnet'], s['mask'], ips.version())
+                subnet = "%s/%s (IPv%s) " % (s['subnet'], s['mask'], ips.version())
                 if ips.version() == 6: pass
                 elif ip_addr in ips and s['mask'] == str(mask):
                     subnet_id = s['id']
         if subnet_id is None:
             raise Exception("Subnet doesn't exist for ip %s" % ip_addr)
         else:
-            print "Adding %s/%s to subnet %s" % (ip_addr, mask, p)
+            address = "%s/%s" % (ip_addr, mask)
+            if mac: address += " (%s)" % mac
+            print "Adding %s to subnet %s" % (address, subnet)
         ip_addr = struct.unpack("!I", socket.inet_aton(ip_addr))[0]
         res = self.sendRequest({
             'controller' : 'addresses',
