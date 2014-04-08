@@ -10,7 +10,6 @@ from IPy import IP
 
 KEY_SIZE = 16
 BLOCK_SIZE = 32
-DEBUG = False
 
 class Api(object):
 
@@ -18,29 +17,30 @@ class Api(object):
     _app_key = ''
     _api_url = ''
  
-    def __init__(self, app_id='', app_key='', api_url=''):
+    def __init__(self, app_id='', app_key='', api_url='', debug=False):
         """ Construct an Api object, 
             taking an APP ID, APP KEY and API URL parameter """
         self._app_id  = app_id
         self._app_key = app_key
         self._api_url = api_url
+        self._debug   = debug
  
     def sendRequest(self, request_params={}):
         """ Send the request to the API server
             also encrypts the request, then checks
             if the results are valid """
-        if DEBUG: print "Request Params: %s" % request_params
+        if self._debug: print "Request Params: %s" % request_params
         request = json.dumps(request_params).encode('utf-8')
         enc_request = encrypt(self._app_key, request)
-        if DEBUG: print "Encrypted Resquest: %s" % enc_request
+        if self._debug: print "Encrypted Resquest: %s" % enc_request
         params = {'enc_request': enc_request, 'app_id': self._app_id}
         data = urllib.urlencode(params)
         req = urllib2.Request(self._api_url, data)
-        if DEBUG: print "Querying '%s'..." % self._api_url
+        if self._debug: print "Querying '%s'..." % self._api_url
         response = urllib2.urlopen(req)
         try:
             result = json.loads(response.read())
-            if DEBUG: print "Result: %s" % result
+            if self._debug: print "Result: %s" % result
             return result
         except ValueError, e:
             print "Error", e
@@ -109,19 +109,20 @@ class Api(object):
         i = ip_addr.split('/')
         ip_addr = i[0]
         if len(i) > 1: mask = i[1]
+        p = ""
         if subnet_id is None:
             print "Looking for subnet..."
             for s in self.getSubnets(format='ip'):
                 if not s['subnet'] or not s['mask']: continue
                 ips = IP('%s/%s' % (s['subnet'], s['mask']))
-                p = "- (IPv%s) %s/%s" % (ips.version(), s['subnet'], s['mask'])
+                p = "%s/%s (IPv%s) " % (s['subnet'], s['mask'], ips.version())
                 if ips.version() == 6: pass
-                elif ip_addr in ips and s['mask'] == mask:
+                elif ip_addr in ips and s['mask'] == str(mask):
                     subnet_id = s['id']
-                    p += " <- %s" % ip_addr
-                print p
         if subnet_id is None:
             raise Exception("Subnet doesn't exist for ip %s" % ip_addr)
+        else:
+            print "Adding %s/%s to subnet %s" % (ip_addr, mask, p)
         ip_addr = struct.unpack("!I", socket.inet_aton(ip_addr))[0]
         res = self.sendRequest({
             'controller' : 'addresses',

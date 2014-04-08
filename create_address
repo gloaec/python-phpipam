@@ -7,47 +7,46 @@
 # License GPLv3: http://sourceforge.net/directory/license:gplv3/
 ##########################################################################
 
-import sys, getopt
+import sys
+import argparse
 from phpipam import Api
 
+config = {}
+
 def main(argv):
-    config = {}
-    execfile("phpipam.conf", config)
+    version = ' '.join([sys.argv[0], config['VERSION']])
+    parser  = argparse.ArgumentParser(version=version)
 
-    api = Api(app_id=config['APP_ID'], 
-              app_key=config['APP_KEY'], 
-              api_url=config['API_URL'])
+    parser.add_argument("ip",
+                help    = "IP address (CIDR format supported)")
+    parser.add_argument("-d", "--description", 
+                help    = "Ip address description")
+    parser.add_argument("-D", "--debug", 
+                action  = "store_true",
+                help    = "Debug mode")
+    parser.add_argument("-m", "--mac", 
+                help    = "Mac address")
+    parser.add_argument("-n", "--mask", 
+                help    = "Netmask",
+                default = 24)
 
-    description = None
-    ip_address  = None
-    mac_address = None
-    mask        = 24
+    args = parser.parse_args()
+
+    api = Api(app_id  = config['APP_ID'], 
+              app_key = config['APP_KEY'], 
+              api_url = config['API_URL'],
+              debug   = args.debug)
 
     try:
-       opts, args = getopt.getopt(argv,"hd:i:p:m:",["description=","ip_address=","mac_address=","mask="])
-    except getopt.GetoptError:
-       print "Usage: create_address -d <description> -i <ip_address> -p <mac_address> -m <mask>"
-       sys.exit(2)
-    for opt, arg in opts:
-       if opt == '-h':
-          print "Usage: create_address -d <description> -i <ip_address> -p <mac_address> -m <mask>\n\n"
-          print "  -d <description>  Host description\n\n"
-          print "  -i <ip_address>   IP Address for the host\n\n"
-          print "  -p <mac_address>  MAC Address for the host\n\n"
-          print "  -m <mask>         IP Mask\n\n"
-          sys.exit()
-       elif opt in ("-d", "--description"):
-          description = arg
-       elif opt in ("-i", "--ip-address"):
-          ip_address = arg
-       elif opt in ("-p", "--mac-address"):
-          mac_address = arg
-       elif opt in ("-m", "--mask"):
-          mask = arg
-
-    result = api.createAddress(description=description, ip_addr=ip_address, mac=mac_address, mask=mask)
-    
-    print result
+        res = api.createAddress(
+                description = args.description, 
+                ip_addr     = args.ip, 
+                mac         = args.mac, 
+                mask        = args.mask)
+        print res
+    except Exception, e:
+        print "Error:", e
 
 if __name__ == "__main__":
+    execfile("phpipam.conf", config)
     main(sys.argv[1:])
