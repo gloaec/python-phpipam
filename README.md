@@ -22,7 +22,9 @@ Installation instructions
 Usage
 -----
 
-Use `./create_address` to create or modify addresses
+### `./createip` 
+
+Use to create or modify addresses
 
     usage: create_address [-h] [-v] [-d DESCRIPTION] [-D] [-m MAC] [-n MASK] ip
     
@@ -38,5 +40,11 @@ Use `./create_address` to create or modify addresses
       -m MAC, --mac MAC     Mac address
       -n MASK, --mask MASK  Netmask
 
-Use `./get_ipmac_bindings` to get the csv export of IP/MAC addresses bindings
-Use `./get_addresses` to get addresses data to desired format
+### `./getipmacs` 
+
+Use to get the csv export of IP/MAC addresses bindings
+
+### `./getips` 
+
+Use to get addresses data to desired format
+
