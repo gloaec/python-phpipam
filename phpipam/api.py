@@ -142,14 +142,14 @@ class Api(object):
         })
         return res['data']
 
-    def importIpMacBindings(self):
+    def importIpMacBindings(self, separator=','):
        """ Import Ip Addresses and Mac address associated """
        s = ""
        for address in self.getAddresses(format='ip'):
            if not address['description']: address['description'] = 'Unknown'
            if address['ip_addr'] and address['mac']:
-               s+= '#'.join([address['description'], address['ip_addr'], address['mac']])+"\n"
-       return s
+               s+= separator.join([address['description'], address['ip_addr'], address['mac']])+"\n"
+       return s[:-1]
 
     def importAddresses(self, format='csv', separator='#'):
        """ Export Ip addresses to desired format:

@@ -21,14 +21,14 @@ def main(argv):
                 help    = "IP address (CIDR format supported)")
     parser.add_argument("-d", "--description", 
                 help    = "Ip address description")
-    parser.add_argument("-D", "--debug", 
-                action  = "store_true",
-                help    = "Debug mode")
     parser.add_argument("-m", "--mac", 
                 help    = "Mac address")
     parser.add_argument("-n", "--mask", 
                 help    = "Netmask",
                 default = 24)
+    parser.add_argument("-D", "--debug", 
+                action  = "store_true",
+                help    = "Debug mode")
 
     args = parser.parse_args()
 

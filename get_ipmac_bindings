@@ -7,48 +7,53 @@
 # License GPLv3: http://sourceforge.net/directory/license:gplv3/
 ##########################################################################
 
-import sys, getopt
+import sys
+import argparse
 from phpipam import Api
 
+config = {}
+
 def main(argv):
-    config = {}
-    execfile("phpipam.conf", config)
+    version = ' '.join([sys.argv[0], config['VERSION']])
+    parser  = argparse.ArgumentParser(version=version)
 
-    api = Api(app_id=config['APP_ID'], 
-              app_key=config['APP_KEY'], 
-              api_url=config['API_URL'])
+    parser.add_argument("-f", "--format",
+                choices = ['eole', 'csv', 'dhcpd.conf'],
+                default = 'csv',
+                help    = "Output format")
+    parser.add_argument("-o", "--outputfile", 
+                help    = "Destination file")
+    parser.add_argument("-s", "--separator", 
+                default = ',',
+                help    = "CSV export separator")
+    parser.add_argument("-D", "--debug", 
+                action  = "store_true",
+                help    = "Debug mode")
 
-    outputfile = None
-    format     = 'dhcpd.conf'
-    separator  = '#'
+    args = parser.parse_args()
+
+    if args.format == 'eole':
+        args.outputfile = '/var/lib/eole/config/dhcp.conf'
+        args.separator = '#'
+
+    api = Api(app_id  = config['APP_ID'], 
+              app_key = config['APP_KEY'], 
+              api_url = config['API_URL'],
+              debug   = args.debug)
 
     try:
-       opts, args = getopt.getopt(argv,"hf:i:o:s:",["format=","ifile=","ofile=","separator="])
-    except getopt.GetoptError:
-       print "Usage: import_addresses -f <format> [-o <outputfile>]"
-       sys.exit(2)
-    for opt, arg in opts:
-       if opt == '-h':
-          print "Usage: import_addresses -f <format> [-o <outputfile>]\n\n"
-          print "  -f <format>     Possible values: ['csv','dhcpd.conf']\n"
-          print "  -s <separator>  Separator character for csv export (default: '#')"
-          print "  -o <outpufile>  Import ouput file\n\n"
-          sys.exit()
-       elif opt in ("-o", "--ofile"):
-          outputfile = arg
-       elif opt in ("-f", "--format"):
-          format = arg
-       elif opt in ("-s", "--separator"):
-          separator = arg
+        res = api.importIpMacBindings(
+                separator = args.separator)
 
-    result = api.importIpMacBindings()
-
-    if outputfile is None:
-        print result
-    else:
-        f = open(outputfile, 'w')
-        f.write(result)
-        f.close()
+        if args.outputfile is None:
+            print res
+        else:
+            f = open(args.outputfile, 'w')
+            f.write(res)
+            f.close()
+    except Exception, e:
+        print "Error:", e
 
 if __name__ == "__main__":
+    execfile("phpipam.conf", config)
     main(sys.argv[1:])
